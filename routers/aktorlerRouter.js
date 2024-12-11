@@ -3,7 +3,7 @@ const actorsData = require('../data/actors.js');
 
 //aktörleri döndür
 router.get('/', (req, res) => {
-    const { name, gender } = req.query;
+    const { name, gender, page = 1, pageSize = 3 } = req.query;
 
     // Aktörleri filtreleyen yardımcı fonksiyon
     const filterActors = (actors, filters) => {
@@ -27,10 +27,29 @@ router.get('/', (req, res) => {
     // Filtreleri uygula
     const filteredActors = filterActors(actorsData, { name, gender });
 
+    // Sayfa parametreleri
+    const currentPage = parseInt(page, 10);  // Mevcut sayfa
+    const currentPageSize = parseInt(pageSize, 10); // Sayfa başına gösterilecek öğe sayısı
+
+    // Sayfalama için başlangıç ve bitiş indekslerini hesapla
+    const startIndex = (currentPage - 1) * currentPageSize;
+    const endIndex = startIndex + currentPageSize;
+
+    // Aktörlerin sayfalandırılmış verisi
+    const paginatedActors = filteredActors.slice(startIndex, endIndex);
+
+    // Sonucu döndür
+    // res.status(200).json({
+    //     totalCount: filteredActors.length,
+    //     datas: filteredActors
+    // });
+
     // Sonucu döndür
     res.status(200).json({
-        totalCount: filteredActors.length,
-        datas: filteredActors
+        totalCount: filteredActors.length, // Toplam aktör sayısı
+        datas: paginatedActors, // Sayfalama yapılmış aktörler
+        currentPage: currentPage,  // Mevcut sayfa
+        pageSize: currentPageSize, // Sayfa başına öğe sayısı
     });
 });
 
